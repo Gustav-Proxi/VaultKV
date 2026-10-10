@@ -44,6 +44,7 @@ jobs:
         run: |
           helm install vk deploy/helm/vaultkv \
             --set api.generator=extractive --set api.retrieval=bm25 --set ollama.enabled=false \
+            --set-string api.token=ci-smoke-token-0123456789 \
             --wait --timeout 10m
       - name: Smoke test API, finality and metrics
         run: |
@@ -52,13 +53,19 @@ jobs:
           kubectl port-forward svc/vk-vaultkv 8080:8080 >/dev/null 2>&1 &
           kubectl port-forward svc/vk-vaultkv-prometheus 9090:9090 >/dev/null 2>&1 &
           sleep 5
-          TOKEN=$(kubectl get secret vk-vaultkv-token -o jsonpath='{.data.token}' | base64 -d)
+          TOKEN=ci-smoke-token-0123456789
           curl -sf localhost:8080/readyz
           ask() { curl -s -o /tmp/out.json -w "%{http_code}" -H "Authorization: Bearer $TOKEN" \
                     -d "{\"tenant\":\"acme\",\"principal\":\"$1\",\"question\":\"What is the hotel reimbursement limit per night?\"}" \
                     localhost:8080/v1/ask; }
-          test "$(ask alice)" = 200 && grep -q '180' /tmp/out.json
-          ask mallory >/dev/null && ! grep -q '180' /tmp/out.json   # no access, no content
+          code=$(ask alice)
+          cat /tmp/out.json
+          test "$code" = 200
+          grep -q '180' /tmp/out.json
+          code=$(ask mallory)
+          cat /tmp/out.json
+          test "$code" = 200
+          ! grep -q '180' /tmp/out.json   # no access, no content
           curl -sf localhost:8080/metrics | grep -q 'vaultkv_requests_total{status="emitted"} 1'
           for i in $(seq 1 30); do
             curl -sf 'localhost:9090/api/v1/query?query=up%7Bjob%3D%22vaultkv%22%7D' | grep -q '"1"]' && exit 0
