@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>VaultKV · Local observatory</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <aside>
+      <a class="brand" href="/"
+        >▣ <span>VaultKV<small>TRANSACTIONAL RAG</small></span></a
+      >
+      <div class="nav-label">OBSERVATORY</div>
+      <nav aria-label="Main navigation">
+        <button data-view="workspace" class="active">
+          ◈ <span>Workspace</span></button
+        ><button data-view="requests">≡ <span>Requests</span></button
+        ><button data-view="knowledge">▤ <span>Documents & access</span></button
+        ><button data-view="caches">⊞ <span>Performance & safety</span></button
+        ><button data-view="vectorlens">◎ <span>VectorLens</span></button>
+      </nav>
+      <div class="sidebar-foot">
+        <span class="dot"></span> Local operator console
+        <p>SQLite · Ollama · TxnRAG<br />Privileged administration</p>
+      </div>
+    </aside>
+    <main>
+      <header>
+        <div>
+          <div class="eyebrow">VAULTKV / LOCAL DEVELOPMENT</div>
+          <h1 id="page-title">Workspace</h1>
+        </div>
+        <span id="runtime" class="pill">Checking Ollama…</span>
+      </header>
+      <div id="notice" role="status" aria-live="polite" hidden></div>
+      <div id="metrics" class="metrics"></div>
+      <section id="workspace" class="view">
+        <div class="workspace-grid">
+          <article class="panel">
+            <div class="panel-head">
+              <h2>Ask your knowledge</h2>
+              <span class="tag">LIVE PIPELINE</span>
+            </div>
+            <p class="muted">
+              Follow a question from retrieval to authorized release.
+            </p>
+            <form id="ask-form">
+              <label for="question">Question</label
+              ><textarea id="question" required maxlength="1000" rows="4">
+What is the nightly hotel limit?</textarea>
+              <div class="form-grid">
+                <label
+                  >Workspace<input id="tenant" value="acme" required /></label
+                ><label
+                  >User<input id="principal" value="alice" required /></label
+                ><label
+                  >Model<select id="model">
+                    <option>qwen2.5:1.5b</option>
+                  </select></label
+                ><label
+                  >Retrieval<select id="retrieval">
+                    <option value="smart">Smart · fast exact match</option>
+                    <option value="hybrid">
+                      Thorough · keywords + meaning
+                    </option>
+                    <option value="bm25">Fastest · keywords only</option>
+                  </select></label
+                ><label
+                  >Sources<input
+                    id="top-k"
+                    type="number"
+                    min="1"
+                    max="10"
+                    value="2"
+                /></label>
+              </div>
+              <div class="form-bottom">
+                <span class="muted">Buffered output · finality checked</span
+                ><button class="primary" id="run" type="submit">
+                  Run query ↗
+                </button>
+              </div>
+            </form>
+          </article>
+          <article class="panel">
+            <div class="panel-head">
+              <h2>Request journey</h2>
+              <span id="journey-status" class="tag">READY</span>
+            </div>
+            <div id="journey">
+              <div class="empty">
+                Run a query to inspect each stage.<small
+                  >Retrieve → context → generate → authorize</small
+                >
+              </div>
+            </div>
+          </article>
+        </div>
+        <div id="answer" class="panel answer">
+          <div class="empty">
+            Your answer and supporting evidence will appear here.
+          </div>
+        </div>
+      </section>
+      <section id="requests" class="view" hidden>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Request history</h2>
+            <span class="tag">PERSISTED IN SQLITE</span>
+          </div>
+          <div id="request-list"></div>
+        </article>
+        <article id="request-detail" class="panel"></article>
+      </section>
+      <section id="knowledge" class="view" hidden>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Documents & access</h2>
+            <div class="panel-actions">
+              <button id="show-access">Manage users & groups</button>
+              <button id="show-import">Add documents</button>
+            </div>
+          </div>
+          <p class="muted">
+            Open a document to update its text or choose who can use it.
+          </p>
+          <form id="import-form" hidden>
+            <div class="panel-head">
+              <h3>Add documents</h3>
+              <button id="cancel-import" type="button">Cancel</button>
+            </div>
+            <p class="muted">
+              Select up to 20 Markdown or text files. Choose the users and
+              groups that can use new documents.
+            </p>
+            <label
+              >Files<input
+                id="document-files"
+                type="file"
+                accept=".md,.txt,text/markdown,text/plain"
+                multiple
+                required
+            /></label>
+            <div class="form-grid">
+              <label
+                >Workspace<input id="import-workspace" value="acme" required
+              /></label>
+              <label
+                >Users to allow<input
+                  id="import-users"
+                  value="alice"
+                  placeholder="alice, bob"
+              /></label>
+              <label
+                >Groups to allow<input
+                  id="import-groups"
+                  placeholder="staff, managers"
+              /></label>
+            </div>
+            <p class="muted">
+              Selecting an existing filename updates its text and keeps its
+              current access settings.
+            </p>
+            <button class="primary" id="import-submit" type="submit">
+              Import selected files
+            </button>
+            <details>
+              <summary>Prefer the command line?</summary>
+              <p>
+                <code
+                  >uv run vaultkv ingest --path ./docs --workspace acme --user
+                  alice</code
+                >
+              </p>
+            </details>
+          </form>
+          <section id="access-manager" hidden>
+            <div class="panel-head">
+              <div>
+                <h3>Users & groups</h3>
+                <p class="muted">
+                  Reuse groups across documents and disable an account when it
+                  should no longer have access.
+                </p>
+              </div>
+              <button id="close-access" type="button">Close</button>
+            </div>
+            <div class="access-workspace">
+              <label
+                >Workspace<input id="access-workspace" value="acme"
+              /></label>
+              <button id="load-access" type="button">Load workspace</button>
+            </div>
+            <div class="access-grid">
+              <section>
+                <h3>Users</h3>
+                <div id="access-users" class="directory-list"></div>
+                <form id="user-form" class="directory-form">
+                  <label
+                    >Add a user<input
+                      id="new-user"
+                      placeholder="username"
+                      required
+                  /></label>
+                  <button type="submit">Add user</button>
+                </form>
+              </section>
+              <section>
+                <div class="panel-head">
+                  <h3>Groups</h3>
+                  <button id="new-group" type="button">New group</button>
+                </div>
+                <div id="access-groups" class="directory-list"></div>
+                <form id="group-form" class="directory-form">
+                  <input id="group-version" type="hidden" value="0" />
+                  <label
+                    >Group name<input
+                      id="group-name"
+                      placeholder="staff"
+                      required
+                  /></label>
+                  <label
+                    >Members<input id="group-members" placeholder="alice, bob"
+                  /></label>
+                  <label class="check-label"
+                    ><input id="group-enabled" type="checkbox" checked /> Group
+                    is active</label
+                  >
+                  <button type="submit">Save group</button>
+                </form>
+              </section>
+            </div>
+          </section>
+          <div id="documents"></div>
+        </article>
+        <div id="editor" class="panel" hidden></div>
+      </section>
+      <section id="caches" class="view" hidden>
+        <div id="cache-cards" class="cache-grid"></div>
+        <article id="connector-status" class="panel"></article>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Safety checks</h2>
+            <button id="race-run">Run safety checks</button>
+          </div>
+          <p class="muted">
+            Test whether VaultKV stops an answer when access is removed while
+            the answer is being prepared. This uses sample data and does not
+            change your documents.
+          </p>
+          <div id="race-result">
+            <div class="empty">Run the checks to see the results.</div>
+          </div>
+          <hr />
+          <h2>Recent search activity</h2>
+          <div id="events"></div>
+        </article>
+      </section>
+      <section id="vectorlens" class="view" hidden>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Answer evidence</h2>
+            <button id="export">Download report ↓</button>
+          </div>
+          <label class="lens-picker"
+            >Choose a question<select id="lens-request"></select
+          ></label>
+          <p class="muted">
+            See the answer, the sources VaultKV selected, and why each source
+            ranked where it did.
+          </p>
+          <div class="callout">
+            Ranking scores explain source selection. They do not verify every
+            sentence in the answer.
+          </div>
+          <div id="lens"></div>
+        </article>
+      </section>
+      <footer>
+        <span>LOCAL FIRST / NO EXTERNAL ASSETS</span
+        ><span id="updated">Waiting for telemetry</span>
+      </footer>
+    </main>
+  </body>
+</html>

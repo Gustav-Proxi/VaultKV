@@ -1,0 +1,10 @@
+# Single-node kind cluster. VAULT_DIR is substituted by scripts/dev-cluster.sh and
+# mounted read-only so the ingest CronJob can serve a real knowledge base.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraMounts:
+      - hostPath: VAULT_DIR
+        containerPath: /vault
+        readOnly: true

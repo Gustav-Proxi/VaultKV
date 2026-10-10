@@ -1,0 +1,77 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "vaultkv.name" . }}-prometheus
+  labels: {{- include "vaultkv.labels" . | nindent 4 }}
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: {{ .Values.monitoring.prometheus.scrapeInterval }}
+    rule_files: [/etc/prometheus/rules.yml]
+    scrape_configs:
+      - job_name: vaultkv
+        metrics_path: /metrics
+        static_configs:
+          - targets: ["{{ include "vaultkv.name" . }}:{{ .Values.service.port }}"]
+  rules.yml: |
+    groups:
+      - name: vaultkv
+        rules:
+          - alert: VaultKVDown
+            expr: up{job="vaultkv"} == 0
+            for: 2m
+            labels: {severity: critical}
+            annotations: {summary: "VaultKV API is not being scraped"}
+          - alert: VaultKVHighLatency
+            expr: histogram_quantile(0.95, sum(rate(vaultkv_request_duration_seconds_bucket[10m])) by (le)) > 30
+            for: 10m
+            labels: {severity: warning}
+            annotations: {summary: "p95 answer latency above 30s"}
+          - alert: VaultKVBlockedSpike
+            expr: sum(increase(vaultkv_blocked_requests_total[10m])) > 20
+            labels: {severity: warning}
+            annotations: {summary: "Many requests blocked by authorization/finality checks"}
+          - alert: VaultKVFailures
+            expr: increase(vaultkv_requests_total{status="failed"}[10m]) > 5
+            labels: {severity: warning}
+            annotations: {summary: "Answer requests failing (model or storage errors)"}
+          - alert: VaultKVKnowledgeStale
+            expr: changes(vaultkv_knowledge_epoch[24h]) == 0
+            for: 1h
+            labels: {severity: info}
+            annotations: {summary: "No new knowledge snapshot published in 24h"}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vaultkv.name" . }}-prometheus
+  labels: {{- include "vaultkv.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: {{ include "vaultkv.name" . }}-prometheus}
+  template:
+    metadata:
+      labels: {app: {{ include "vaultkv.name" . }}-prometheus}
+    spec:
+      containers:
+        - name: prometheus
+          image: {{ .Values.monitoring.prometheus.image }}
+          args: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=7d"]
+          ports: [{name: http, containerPort: 9090}]
+          readinessProbe: {httpGet: {path: /-/ready, port: http}}
+          volumeMounts: [{name: config, mountPath: /etc/prometheus}]
+      volumes:
+        - name: config
+          configMap: {name: {{ include "vaultkv.name" . }}-prometheus}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "vaultkv.name" . }}-prometheus
+  labels: {{- include "vaultkv.labels" . | nindent 4 }}
+spec:
+  selector: {app: {{ include "vaultkv.name" . }}-prometheus}
+  ports: [{name: http, port: 9090, targetPort: http}]
+{{- end }}

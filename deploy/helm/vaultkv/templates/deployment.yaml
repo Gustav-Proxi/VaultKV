@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vaultkv.name" . }}
+  labels: {{- include "vaultkv.labels" . | nindent 4 }}
+spec:
+  # One replica: SQLite on a ReadWriteOnce volume. Scale out by moving storage first.
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {{- include "vaultkv.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "vaultkv.labels" . | nindent 8 }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.service.port }}"
+        prometheus.io/path: /metrics
+    spec:
+      securityContext: {fsGroup: 10001}
+      {{- if .Values.ollama.enabled }}
+      initContainers:
+        - name: pull-models
+          image: {{ .Values.ollama.image }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              ollama serve >/tmp/ollama.log 2>&1 &
+              until ollama list >/dev/null 2>&1; do sleep 1; done
+              {{- range .Values.ollama.models }}
+              ollama pull {{ . }}
+              {{- end }}
+          volumeMounts: [{name: models, mountPath: /root/.ollama}]
+      {{- end }}
+      containers:
+        - name: api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - api
+            - --host=0.0.0.0
+            - --port={{ .Values.service.port }}
+            - --db=/data/vaultkv.sqlite3
+            - --generator={{ .Values.api.generator }}
+            - --model={{ .Values.api.model }}
+            - --retrieval={{ .Values.api.retrieval }}
+            - --embedding-model={{ .Values.api.embeddingModel }}
+            - --max-concurrent={{ .Values.api.maxConcurrent }}
+          env:
+            - name: VAULTKV_API_TOKEN
+              valueFrom: {secretKeyRef: {name: {{ include "vaultkv.secretName" . }}, key: token}}
+            {{- with .Values.otel.endpoint }}
+            - {name: OTEL_EXPORTER_OTLP_ENDPOINT, value: {{ . | quote }}}
+            - {name: OTEL_SERVICE_NAME, value: vaultkv}
+            {{- end }}
+          ports: [{name: http, containerPort: {{ .Values.service.port }}}]
+          readinessProbe:
+            httpGet: {path: /readyz, port: http}
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet: {path: /healthz, port: http}
+            periodSeconds: 20
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          resources: {{- toYaml .Values.api.resources | nindent 12 }}
+          volumeMounts:
+            - {name: data, mountPath: /data}
+            - {name: tmp, mountPath: /tmp}
+        {{- if .Values.ollama.enabled }}
+        # Sidecar on 127.0.0.1: VaultKV's Ollama client only accepts loopback URLs.
+        - name: ollama
+          image: {{ .Values.ollama.image }}
+          env:
+            - {name: OLLAMA_HOST, value: "127.0.0.1:11434"}
+            - {name: OLLAMA_KEEP_ALIVE, value: "30m"}
+          resources: {{- toYaml .Values.ollama.resources | nindent 12 }}
+          volumeMounts: [{name: models, mountPath: /root/.ollama}]
+        {{- end }}
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: {{ include "vaultkv.name" . }}-data}
+        - name: tmp
+          emptyDir: {}
+        {{- if .Values.ollama.enabled }}
+        - name: models
+          persistentVolumeClaim: {claimName: {{ include "vaultkv.name" . }}-models}
+        {{- end }}

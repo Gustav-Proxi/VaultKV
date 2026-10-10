@@ -1,0 +1,14 @@
+VaultKV is installed.
+
+  kubectl port-forward svc/{{ include "vaultkv.name" . }} 8080:{{ .Values.service.port }}
+  TOKEN=$(kubectl get secret {{ include "vaultkv.secretName" . }} -o jsonpath='{.data.token}' | base64 -d)
+  curl -s localhost:8080/readyz
+  curl -s -H "Authorization: Bearer $TOKEN" -d '{"tenant":"{{ .Values.ingest.tenant }}","principal":"{{ .Values.ingest.user }}","question":"What is the hotel reimbursement limit?"}' localhost:8080/v1/ask
+{{- if .Values.monitoring.enabled }}
+
+Monitoring:
+  kubectl port-forward svc/{{ include "vaultkv.name" . }}-prometheus 9090:9090
+  kubectl port-forward svc/{{ include "vaultkv.name" . }}-grafana 3000:3000
+  GRAFANA_PASSWORD=$(kubectl get secret {{ include "vaultkv.name" . }}-grafana-admin -o jsonpath='{.data.password}' | base64 -d)
+  # Open http://localhost:3000 and sign in as admin.
+{{- end }}

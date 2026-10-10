@@ -1,0 +1,46 @@
+{
+  "bm25": {
+    "quality": {
+      "lexical": {
+        "n": 15,
+        "recall@1": 1.0,
+        "recall@3": 1.0,
+        "mrr": 1.0
+      },
+      "paraphrase": {
+        "n": 13,
+        "recall@1": 0.3846,
+        "recall@3": 0.7692,
+        "mrr": 0.5513
+      },
+      "restricted": {
+        "n": 2,
+        "recall@1": 1.0,
+        "recall@3": 1.0,
+        "mrr": 1.0
+      }
+    }
+  },
+  "hybrid": {
+    "quality": {
+      "lexical": {
+        "n": 15,
+        "recall@1": 1.0,
+        "recall@3": 1.0,
+        "mrr": 1.0
+      },
+      "paraphrase": {
+        "n": 13,
+        "recall@1": 0.6923,
+        "recall@3": 0.9231,
+        "mrr": 0.8077
+      },
+      "restricted": {
+        "n": 2,
+        "recall@1": 1.0,
+        "recall@3": 1.0,
+        "mrr": 1.0
+      }
+    }
+  }
+}

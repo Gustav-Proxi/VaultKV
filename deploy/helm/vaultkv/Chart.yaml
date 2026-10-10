@@ -1,0 +1,6 @@
+apiVersion: v2
+name: vaultkv
+description: Permission-aware transactional RAG (TxnRAG) with Prometheus metrics and an Ollama sidecar
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

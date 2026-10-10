@@ -1,0 +1,53 @@
+Reqid: 0-8bd38806, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 0, need to load: 0
+[req_id=0-8bd38806] Stored 12036 out of total 12048 tokens. size: 0.6428 GB, cost 839.1722 ms, throughput: 0.7660 GB/s
+Reqid: 1-b5f0ca25, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 2-944107e6, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 3-83ce4f37, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 4-bf4a2cb8, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 13, need to load: 13
+[req_id=unspecified] Retrieved 13 out of 13 out of total 13 tokens
+[req_id=4-bf4a2cb8] Stored 12004 out of total 12048 tokens. size: 0.6411 GB, cost 780.1817 ms, throughput: 0.8217 GB/s
+Reqid: 5-89d53912, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 6-bb9da642, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 7-83723581, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 8-85782d32, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 13, need to load: 13
+[req_id=unspecified] Retrieved 13 out of 13 out of total 13 tokens
+[req_id=8-85782d32] Stored 12004 out of total 12048 tokens. size: 0.6411 GB, cost 779.2530 ms, throughput: 0.8227 GB/s
+Reqid: 9-80377bad, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 10-b787871f, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 11-b363f65e, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 12-9e412b44, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 13, need to load: 13
+[req_id=unspecified] Retrieved 13 out of 13 out of total 13 tokens
+[req_id=12-9e412b44] Stored 12004 out of total 12048 tokens. size: 0.6411 GB, cost 780.5607 ms, throughput: 0.8213 GB/s
+Reqid: 13-99d758f3, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 14-8ba65198, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 15-9ca08088, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 16-8ea30802, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 13, need to load: 13
+[req_id=unspecified] Retrieved 13 out of 13 out of total 13 tokens
+[req_id=16-8ea30802] Stored 12004 out of total 12048 tokens. size: 0.6411 GB, cost 779.1253 ms, throughput: 0.8228 GB/s
+Reqid: 17-a477b978, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 18-abd93fc2, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 19-951b308b, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 20-b7a739c9, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 13, need to load: 13
+[req_id=unspecified] Retrieved 13 out of 13 out of total 13 tokens
+[req_id=20-b7a739c9] Stored 12004 out of total 12048 tokens. size: 0.6411 GB, cost 779.2718 ms, throughput: 0.8227 GB/s
+Reqid: 21-9f7e12eb, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 22-b1666e38, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens
+Reqid: 23-94ce4a0c, Total tokens 12048, Inference Engine computed tokens: 0, LMCache hit tokens: 12048, need to load: 12047
+[req_id=unspecified] Retrieved 12036 out of 12048 out of total 12048 tokens

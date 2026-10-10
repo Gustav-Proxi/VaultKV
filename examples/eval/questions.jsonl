@@ -1,0 +1,30 @@
+{"id": "q01", "kind": "lexical", "doc": "travel-domestic.md", "question": "What is the hotel reimbursement limit per night for domestic travel?"}
+{"id": "q02", "kind": "lexical", "doc": "travel-domestic.md", "question": "Within how many days must itemized receipts be submitted after domestic travel?"}
+{"id": "q03", "kind": "lexical", "doc": "travel-international.md", "question": "When is business class airfare allowed for international trips?"}
+{"id": "q04", "kind": "lexical", "doc": "travel-international.md", "question": "Who must approve international trips and how far before departure?"}
+{"id": "q05", "kind": "lexical", "doc": "expenses-meals.md", "question": "What is the daily cap on meal reimbursement while traveling?"}
+{"id": "q06", "kind": "lexical", "doc": "expenses-meals.md", "question": "Is alcohol reimbursable during client entertainment?"}
+{"id": "q07", "kind": "lexical", "doc": "expenses-equipment.md", "question": "How much can remote employees expense for a monitor, keyboard and chair?"}
+{"id": "q08", "kind": "lexical", "doc": "leave-annual.md", "question": "How many days of paid annual leave do full-time employees receive?"}
+{"id": "q09", "kind": "lexical", "doc": "leave-annual.md", "question": "How many unused annual leave days may be carried into the next year?"}
+{"id": "q10", "kind": "lexical", "doc": "leave-parental.md", "question": "How many weeks of paid parental leave do parents receive?"}
+{"id": "q11", "kind": "lexical", "doc": "leave-sick.md", "question": "When is a doctor's note required for sick leave?"}
+{"id": "q12", "kind": "lexical", "doc": "security-incidents.md", "question": "How quickly must suspected security incidents be reported?"}
+{"id": "q13", "kind": "lexical", "doc": "security-passwords.md", "question": "What is the minimum password length?"}
+{"id": "q14", "kind": "lexical", "doc": "security-passwords.md", "question": "When do access tokens expire and must be rotated?"}
+{"id": "q15", "kind": "lexical", "doc": "security-devices.md", "question": "How soon must a lost or stolen laptop be reported to IT?"}
+{"id": "p01", "kind": "paraphrase", "doc": "travel-domestic.md", "question": "What's the most I can spend on a room each night on a trip inside the country?"}
+{"id": "p02", "kind": "paraphrase", "doc": "travel-domestic.md", "question": "Can I fly premium seats on a short trip within the US?"}
+{"id": "p03", "kind": "paraphrase", "doc": "travel-international.md", "question": "Can I sit up front on a long overseas flight?"}
+{"id": "p04", "kind": "paraphrase", "doc": "expenses-meals.md", "question": "How much food can I claim per day on the road?"}
+{"id": "p05", "kind": "paraphrase", "doc": "expenses-meals.md", "question": "Will the company pay for drinks at dinner with a customer?"}
+{"id": "p06", "kind": "paraphrase", "doc": "expenses-equipment.md", "question": "I work from home, can I get reimbursed for a desk setup?"}
+{"id": "p07", "kind": "paraphrase", "doc": "expenses-equipment.md", "question": "Am I allowed to buy my own computer and claim it?"}
+{"id": "p08", "kind": "paraphrase", "doc": "leave-annual.md", "question": "How much vacation do I get each year?"}
+{"id": "p09", "kind": "paraphrase", "doc": "leave-parental.md", "question": "How long can I stay home after having a baby?"}
+{"id": "p10", "kind": "paraphrase", "doc": "leave-sick.md", "question": "Do I need proof from a physician if I'm ill for a couple of days?"}
+{"id": "p11", "kind": "paraphrase", "doc": "security-incidents.md", "question": "I think we got hacked, who do I tell and how fast?"}
+{"id": "p12", "kind": "paraphrase", "doc": "security-passwords.md", "question": "Is two-step login required for the VPN?"}
+{"id": "p13", "kind": "paraphrase", "doc": "security-devices.md", "question": "I left my phone in a taxi, what should I do?"}
+{"id": "r01", "kind": "restricted", "doc": "hr-compensation.md", "question": "What is the base salary range for engineering level three?"}
+{"id": "r02", "kind": "restricted", "doc": "finance-forecast.md", "question": "What is the internal quarterly revenue forecast?"}

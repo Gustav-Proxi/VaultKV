@@ -1,0 +1,29 @@
+{{- if .Values.ingest.enabled }}
+{{- $root := ternary .Values.ingest.imagePath "/source" (eq .Values.ingest.source "image") }}
+# Initial import at install/upgrade, then periodic refresh.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "vaultkv.name" . }}-ingest-initial
+  labels: {{- include "vaultkv.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 3
+  template:
+    spec: {{- include "vaultkv.ingestPod" (dict "ctx" . "root" $root) | nindent 6 }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "vaultkv.name" . }}-ingest
+  labels: {{- include "vaultkv.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.ingest.schedule | quote }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec: {{- include "vaultkv.ingestPod" (dict "ctx" . "root" $root) | nindent 10 }}
+{{- end }}

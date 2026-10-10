@@ -1,0 +1,8 @@
+# Copy to values-local.yaml, which is ignored by Git, before serving a host knowledge base.
+ingest:
+  source: hostPath
+  hostPath: /vault
+  tenant: demo
+  user: alice
+  schedule: "*/30 * * * *"
+  batches: ["."]

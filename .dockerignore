@@ -1,0 +1,10 @@
+.venv
+.git
+**/__pycache__
+.pytest_cache
+.ruff_cache
+dist
+data
+upstream
+benchmarks/results*
+*.sqlite3

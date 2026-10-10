@@ -1,0 +1,67 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.10"
+      - run: uv sync --dev --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest -q
+      # Blocks the merge on: retrieval recall/MRR regression vs benchmarks/eval_baseline.json,
+      # any restricted chunk retrieved by an unauthorized user, any post-revocation emission,
+      # or p95 retrieval latency over budget.
+      - name: Eval gate (BM25, deterministic)
+        run: uv run python benchmarks/eval_gate.py | tee eval-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-report
+          path: eval-report.json
+
+  deploy-smoke:
+    needs: test-and-eval
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - run: helm lint deploy/helm/vaultkv
+      - run: docker build -t vaultkv:0.1.0 .
+      - uses: helm/kind-action@v1
+        with:
+          cluster_name: vaultkv
+      - run: kind load docker-image vaultkv:0.1.0 --name vaultkv
+      - name: Install chart (extractive generator, sample corpus, monitoring on)
+        run: |
+          helm install vk deploy/helm/vaultkv \
+            --set api.generator=extractive --set api.retrieval=bm25 --set ollama.enabled=false \
+            --wait --timeout 10m
+      - name: Smoke test API, finality and metrics
+        run: |
+          set -euo pipefail
+          kubectl wait --for=condition=complete job/vk-vaultkv-ingest-initial --timeout=300s
+          kubectl port-forward svc/vk-vaultkv 8080:8080 >/dev/null 2>&1 &
+          kubectl port-forward svc/vk-vaultkv-prometheus 9090:9090 >/dev/null 2>&1 &
+          sleep 5
+          TOKEN=$(kubectl get secret vk-vaultkv-token -o jsonpath='{.data.token}' | base64 -d)
+          curl -sf localhost:8080/readyz
+          ask() { curl -s -o /tmp/out.json -w "%{http_code}" -H "Authorization: Bearer $TOKEN" \
+                    -d "{\"tenant\":\"acme\",\"principal\":\"$1\",\"question\":\"What is the hotel reimbursement limit per night?\"}" \
+                    localhost:8080/v1/ask; }
+          test "$(ask alice)" = 200 && grep -q '180' /tmp/out.json
+          ask mallory >/dev/null && ! grep -q '180' /tmp/out.json   # no access, no content
+          curl -sf localhost:8080/metrics | grep -q 'vaultkv_requests_total{status="emitted"} 1'
+          for i in $(seq 1 30); do
+            curl -sf 'localhost:9090/api/v1/query?query=up%7Bjob%3D%22vaultkv%22%7D' | grep -q '"1"]' && exit 0
+            sleep 5
+          done
+          echo "Prometheus never scraped VaultKV" && exit 1

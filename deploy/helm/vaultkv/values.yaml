@@ -1,0 +1,65 @@
+image:
+  repository: vaultkv
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+api:
+  # "ollama" uses the sidecar below; "extractive" needs no model (CI / smoke tests).
+  generator: ollama
+  model: qwen2.5:1.5b
+  # hybrid = BM25 + dense embeddings (generalizes to paraphrases); bm25 = keyword only.
+  retrieval: hybrid
+  embeddingModel: nomic-embed-text:latest
+  maxConcurrent: 2
+  # Bearer token for the trusted gateway. Leave empty to generate one at install time,
+  # or point existingSecret at a Secret with key `token`.
+  token: ""
+  existingSecret: ""
+  resources:
+    requests: {cpu: 100m, memory: 128Mi}
+    limits: {memory: 512Mi}
+
+service:
+  type: ClusterIP
+  port: 8080
+
+persistence:
+  size: 1Gi
+  storageClass: ""
+
+ollama:
+  enabled: true
+  image: ollama/ollama:0.34.0
+  models: [qwen2.5:1.5b, nomic-embed-text:latest]
+  modelStorage: 4Gi
+  resources:
+    requests: {cpu: 500m, memory: 2Gi}
+    limits: {memory: 4Gi}
+
+ingest:
+  enabled: true
+  # Re-import on a schedule so the served knowledge stays fresh (each run that
+  # changes content publishes a new knowledge epoch).
+  schedule: "*/30 * * * *"
+  tenant: acme
+  user: alice
+  # source: image = corpus baked into the image; hostPath = a directory on the node.
+  source: image
+  imagePath: /opt/vaultkv/examples/corpus
+  hostPath: ""
+  # Subdirectories imported as separate batches (each import is capped at 2 MB).
+  batches: ["."]
+
+otel:
+  # e.g. http://otel-collector:4318 ; empty disables tracing.
+  endpoint: ""
+
+monitoring:
+  enabled: true
+  prometheus:
+    image: prom/prometheus:v3.14.0
+    scrapeInterval: 15s
+  grafana:
+    image: grafana/grafana:13.0.5
+    # Leave empty to generate and retain a random password in a Kubernetes Secret.
+    adminPassword: ""

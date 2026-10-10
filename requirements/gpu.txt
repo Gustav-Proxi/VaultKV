@@ -1,0 +1,4 @@
+# Experimental source-inspected target, not a GPU-validated compatibility promise.
+# Linux CUDA / Python 3.12. Build LMCache against vLLM's installed torch ABI.
+vllm==0.12.0
+lmcache==0.3.9

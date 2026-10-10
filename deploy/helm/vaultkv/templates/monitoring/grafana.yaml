@@ -1,0 +1,82 @@
+{{- if .Values.monitoring.enabled }}
+{{- $secretName := printf "%s-grafana-admin" (include "vaultkv.name" .) }}
+{{- $existing := lookup "v1" "Secret" .Release.Namespace $secretName }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $secretName }}
+  labels: {{- include "vaultkv.labels" . | nindent 4 }}
+type: Opaque
+data:
+  {{- if .Values.monitoring.grafana.adminPassword }}
+  password: {{ .Values.monitoring.grafana.adminPassword | b64enc }}
+  {{- else if $existing }}
+  password: {{ index $existing.data "password" }}
+  {{- else }}
+  password: {{ randAlphaNum 24 | b64enc }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "vaultkv.name" . }}-grafana
+  labels: {{- include "vaultkv.labels" . | nindent 4 }}
+data:
+  datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        uid: prometheus
+        type: prometheus
+        access: proxy
+        url: http://{{ include "vaultkv.name" . }}-prometheus:9090
+        isDefault: true
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: vaultkv
+        type: file
+        options: {path: /var/lib/grafana/dashboards}
+  vaultkv.json: |
+{{ .Files.Get "dashboards/vaultkv.json" | indent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vaultkv.name" . }}-grafana
+  labels: {{- include "vaultkv.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: {{ include "vaultkv.name" . }}-grafana}
+  template:
+    metadata:
+      labels: {app: {{ include "vaultkv.name" . }}-grafana}
+    spec:
+      containers:
+        - name: grafana
+          image: {{ .Values.monitoring.grafana.image }}
+          env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: {{ $secretName }}, key: password}
+            - {name: GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH, value: /var/lib/grafana/dashboards/vaultkv.json}
+          ports: [{name: http, containerPort: 3000}]
+          readinessProbe: {httpGet: {path: /api/health, port: http}}
+          volumeMounts:
+            - {name: config, mountPath: /etc/grafana/provisioning/datasources/datasource.yaml, subPath: datasource.yaml}
+            - {name: config, mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml, subPath: dashboards.yaml}
+            - {name: config, mountPath: /var/lib/grafana/dashboards/vaultkv.json, subPath: vaultkv.json}
+      volumes:
+        - name: config
+          configMap: {name: {{ include "vaultkv.name" . }}-grafana}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "vaultkv.name" . }}-grafana
+  labels: {{- include "vaultkv.labels" . | nindent 4 }}
+spec:
+  selector: {app: {{ include "vaultkv.name" . }}-grafana}
+  ports: [{name: http, port: 3000, targetPort: http}]
+{{- end }}

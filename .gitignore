@@ -1,0 +1,20 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+dist/
+*.egg-info/
+*.sqlite3*
+data/
+models/
+/results/
+.env
+.DS_Store
+upstream/**/logs/
+
+# Local operator and agent context; never publish personal vault configuration.
+AGENTS.local.md
+deploy/helm/values-local.yaml
+deploy/helm/values-vault.yaml
+upstream/lmcache-3238/colab_ssh.ipynb
