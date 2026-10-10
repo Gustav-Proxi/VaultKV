@@ -66,7 +66,8 @@ jobs:
           cat /tmp/out.json
           test "$code" = 200
           ! grep -q '180' /tmp/out.json   # no access, no content
-          curl -sf localhost:8080/metrics | grep -q 'vaultkv_requests_total{status="emitted"} 1'
+          # Both the authorized answer and the safe no-evidence response are released outputs.
+          curl -sf localhost:8080/metrics | grep -q 'vaultkv_requests_total{status="emitted"} 2'
           for i in $(seq 1 30); do
             curl -sf 'localhost:9090/api/v1/query?query=up%7Bjob%3D%22vaultkv%22%7D' | grep -q '"1"]' && exit 0
             sleep 5
